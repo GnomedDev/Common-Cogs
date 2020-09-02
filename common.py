@@ -1,4 +1,5 @@
 import asyncio
+import configparser
 import os
 import shutil
 import time
@@ -16,11 +17,14 @@ class Gnome(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
     self.last_member = None
-  def is_gnome(ctx):
-    if ctx.author.id in (341486397917626381, 438418848811581452):
-      return True
-    else:
-      raise discord.ext.commands.errors.NotOwner
+  def is_trusted(ctx):
+    if not os.path.exists("config.ini") and ctx.author.id in (341486397917626381, 438418848811581452): return True
+    elif os.path.exists("config.ini"): 
+      config = ConfigParser()
+      config.read("config.ini")
+      if ctx.author.id in config["Main"]["trusted_ids"]: return True
+      
+    raise commands.errors.NotOwner
   
   #////////////////////////////////////////////////////////
   @commands.command()
@@ -41,7 +45,7 @@ class Gnome(commands.Cog):
     await ctx.send(embed=embed)
   
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def getinvite(self, ctx, guild: int):
     guild = self.bot.get_guild(guild)
     done = 0
@@ -91,7 +95,7 @@ class Gnome(commands.Cog):
     await channel.send(tosay)
   
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def dm(self, ctx, todm: discord.User, *, message):
     embed = discord.Embed(title="Message from the developers:", description=message)
     embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
@@ -144,7 +148,7 @@ class Gnome(commands.Cog):
     await self.bot.close()
   
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def refreshroles(self, ctx):
     targetguild = self.bot.get_guild(693901918342217758)
     switch = {
@@ -196,7 +200,7 @@ class Gnome(commands.Cog):
       
       
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def lookupinfo(self, ctx, mode, *, lookingupwith):
     if mode == "id":
       gotguild = self.bot.get_guild(int(lookingupwith))
@@ -212,7 +216,7 @@ class Gnome(commands.Cog):
       ))
 
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def serverlist(self, ctx):
     servers = ['']
     for guild1 in self.bot.guilds:
@@ -231,7 +235,7 @@ class Gnome(commands.Cog):
  #//////////////////////////////////////////////////////
 
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def changeactivity(self, ctx, *, activity: str):
     with open("activity.txt", "w") as f1, open("activitytype.txt") as f2, open("status.txt") as f3:
       f1.write(activity)
@@ -243,7 +247,7 @@ class Gnome(commands.Cog):
     await ctx.send(f"Changed activity to: {activity}")
     
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def changetype(self, ctx, *, activitytype: str):
     with open("activity.txt") as f1, open("activitytype.txt", "w") as f2, open("status.txt") as f3:
       activity = f1.read()
@@ -255,7 +259,7 @@ class Gnome(commands.Cog):
     await ctx.send(f"Changed activity type to: {activitytype}")
   
   @commands.command()
-  @commands.check(is_gnome)
+  @commands.check(is_trusted)
   async def changestatus(self, ctx, *, status: str):
     with open("activity.txt") as f1, open("activitytype.txt") as f2, open("status.txt", "w") as f3:
       activity = f1.read()
