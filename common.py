@@ -1,5 +1,5 @@
 import asyncio
-import configparser
+from configparser import ConfigParser
 import os
 import shutil
 import time
