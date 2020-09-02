@@ -22,7 +22,7 @@ class Gnome(commands.Cog):
     elif os.path.exists("config.ini"): 
       config = ConfigParser()
       config.read("config.ini")
-      if ctx.author.id in config["Main"]["trusted_ids"]: return True
+      if str(ctx.author.id) in config["Main"]["trusted_ids"]: return True
       
     raise commands.errors.NotOwner
   
