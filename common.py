@@ -16,7 +16,6 @@ def setup(bot):
 class Gnome(commands.Cog):
   def __init__(self, bot):
     self.bot = bot
-    self.last_member = None
   def is_trusted(ctx):
     if not os.path.exists("config.ini") and ctx.author.id in (341486397917626381, 438418848811581452): return True
     elif os.path.exists("config.ini"): 
