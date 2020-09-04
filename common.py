@@ -9,6 +9,30 @@ from inspect import cleandoc
 import discord
 from discord.ext import commands, tasks
 
+invites = {
+    # TTS bot
+    "513423712582762502": "https://discordapp.com/api/oauth2/authorize?client_id=513423712582762502&permissions=36719617&scope=bot",
+    # F@H
+    "565820959089754119": "https://discordapp.com/api/oauth2/authorize?client_id=565820959089754119&permissions=84992&scope=bot",
+    # Channel maker
+    "689564772512825363": "https://discordapp.com/api/oauth2/authorize?client_id=689564772512825363&permissions=68624&scope=bot",
+
+    # TTS bot dev for testing
+    "698218518335848538": "https://example.com"
+}
+
+
+colours = {
+    # TTS bot
+    "513423712582762502": 0x3498DB,
+    # F@H
+    "565820959089754119": 0xFE6215,
+    # Channel maker
+    "689564772512825363": 0x737F8D,
+    # TTS bot dev
+    "698218518335848538": 0x3498DB
+}
+
 
 def setup(bot):
   bot.add_cog(Gnome(bot))
@@ -107,19 +131,25 @@ class Gnome(commands.Cog):
     await self.bot.get_channel(696325283296444498).send(f"{str(ctx.author)} in {ctx.guild.name} suggested: {suggestion}")
     await ctx.send("Suggestion noted")
 
-  @commands.command()
-  async def invite(self, ctx):
-    await ctx.send(f"To invite {self.bot.user.mention}, join <https://discord.gg/zWPWwQC> and the invites are in '#invites-and-rules'!")
-  
-  @commands.command()
-  @commands.is_owner()
-  async def load_cog(self, ctx, *, loaded: str):
-    try:
-      self.bot.load_extension(loaded)
-    except Exception as e:
-      await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
-    else:
-      await ctx.send('**`SUCCESS`**')
+    @commands.command()
+    async def invite(self, ctx):
+        await ctx.message.delete()
+        embed = discord.Embed(title="Invite", colour=colours[str(self.bot.user.id)], description=f"""
+                [Invite me to your server]({invites[str(self.bot.user.id)]})
+                [Join my support server](https://discord.gg/zWPWwQC)
+                """)
+        embed.set_author(name=ctx.author.nick, icon_url=ctx.author.avatar_url)
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    @commands.is_owner()
+    async def load_cog(self, ctx, *, loaded: str):
+        try:
+            self.bot.load_extension(loaded)
+        except Exception as e:
+            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
+        else:
+            await ctx.send('**`SUCCESS`**')
 
   @commands.command()
   @commands.is_owner()
