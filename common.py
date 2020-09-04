@@ -21,7 +21,6 @@ invites = {
     "698218518335848538": "https://example.com"
 }
 
-
 colours = {
     # TTS bot
     "513423712582762502": 0x3498DB,
@@ -42,13 +41,15 @@ class Gnome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @staticmethod
     def is_trusted(ctx):
         if not os.path.exists("config.ini") and ctx.author.id in (341486397917626381, 438418848811581452):
             return True
         elif os.path.exists("config.ini"):
             config = ConfigParser()
             config.read("config.ini")
-            if str(ctx.author.id) in config["Main"]["trusted_ids"]: return True
+            if str(ctx.author.id) in config["Main"]["trusted_ids"]:
+                return True
 
         raise commands.errors.NotOwner
 
@@ -75,16 +76,15 @@ class Gnome(commands.Cog):
     @commands.command()
     @commands.check(is_trusted)
     async def getinvite(self, ctx, guild: int):
+        invite = None
         guild = self.bot.get_guild(guild)
-        done = 0
         for channel in guild.channels:
             try:
                 invite = await channel.create_invite()
-                done = 1
                 break
             except:
                 continue
-        if done == 0:
+        if invite is None:
             await ctx.send("No channel to make invite for or no perms")
         else:
             await ctx.send(str(invite))
@@ -93,7 +93,7 @@ class Gnome(commands.Cog):
     @commands.is_owner()
     async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, str], *, message):
         """mimics another user"""
-        if type(user) == type(""):
+        if isinstance(user, str):
             hookname = user
             avatar = "https://cdn.discordapp.com/avatars/689564772512825363/f05524fd9e011108fd227b85c53e3d87.png?size=128"
         else:
