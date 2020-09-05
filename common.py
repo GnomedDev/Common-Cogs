@@ -17,7 +17,8 @@ class Gnome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     def is_trusted(ctx):
-        if not os.path.exists("config.ini") and ctx.author.id in (341486397917626381, 438418848811581452): return True
+        if not os.path.exists("config.ini") and ctx.author.id in (341486397917626381, 438418848811581452):
+            return True
         elif os.path.exists("config.ini"):
             config = ConfigParser()
             config.read("config.ini")
@@ -64,9 +65,9 @@ class Gnome(commands.Cog):
     @commands.is_owner()
     async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, str], *, message):
         """mimics another user"""
-        if type(user) == type(""):
+        if isinstance(user, str):
             hookname = user
-            avatar = "https://cdn.discordapp.com/avatars/689564772512825363/f05524fd9e011108fd227b85c53e3d87.png?size=128"
+            avatar = "https://cdn.discordapp.com/avatars/689564772512825363/f05524fd9e011108fd227b85c53e3d87.png"
         else:
             hookname = user.display_name
             avatar = user.avatar_url
@@ -87,10 +88,9 @@ class Gnome(commands.Cog):
     @commands.command()
     @commands.is_owner()
     async def say(self, ctx, channel: discord.TextChannel, *, tosay):
-        try:
-            await ctx.message.delete()
-        except:
-            pass
+        try:    await ctx.message.delete()
+        except: pass
+        
         await channel.send(tosay)
 
     @commands.command()
@@ -109,8 +109,16 @@ class Gnome(commands.Cog):
 
     @commands.command()
     async def invite(self, ctx):
-        await ctx.send(f"To invite {self.bot.user.mention}, join <https://discord.gg/zWPWwQC> and the invites are in '#invites-and-rules'!")
-
+        try:
+            config = ConfigParser()
+            config.read("config.ini")
+            if str(ctx.guild.id) == str(config["Main"]["main_server"]):
+                await ctx.send(f"Check out <#694127922801410119> to invite {self.bot.user.mention}!")
+            else:
+                await ctx.send(f"Join https://discord.gg/zWPWwQC and look in #{self.bot.get_channel(694127922801410119).name} to invite {self.bot.user.mention}!")
+        except:
+            await ctx.send(f"To invite {self.bot.user.mention}, join <https://discord.gg/zWPWwQC> and the invites are in '#invites-and-rules'!")
+            
     @commands.command()
     @commands.is_owner()
     async def load_cog(self, ctx, *, loaded: str):
