@@ -70,7 +70,7 @@ class Gnome(commands.Cog):
             avatar = user.avatar_url
 
         webhook = await ctx.channel.create_webhook(name=hookname)
-        await webhook.send(message,avatar_url=avatar)
+        await webhook.send(message.replace("@", "@\N{zero width space}"), avatar_url=avatar)
         await ctx.message.delete()
         await webhook.delete()
 
