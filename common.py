@@ -47,19 +47,16 @@ class Gnome(commands.Cog):
     @commands.command()
     @commands.check(is_trusted)
     async def getinvite(self, ctx, guild: int):
+        invite = False
         guild = self.bot.get_guild(guild)
-        done = 0
+        
         for channel in guild.channels:
-            try:
-                invite = await channel.create_invite()
-                done = 1
-                break
-            except:
-                continue
-        if done == 0:
-            await ctx.send("No channel to make invite for or no perms")
-        else:
-            await ctx.send(str(invite))
+            try:    invite = str(await channel.create_invite())
+            except: continue
+            if invite:
+                return await ctx.send(f"Invite to {guild.name} | {guild.id}: {invite}")
+                  
+        await ctx.send("Error: No permissions to make an invite!")
 
     @commands.command()
     @commands.is_owner()
