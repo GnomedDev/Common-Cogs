@@ -98,6 +98,17 @@ class Gnome(commands.Cog):
 
         sent = await todm.send(embed=embed)
         await ctx.send(f"Sent message:", embed=sent.embeds[0])
+    
+    @commands.command()
+    @commands.check(is_trusted)
+    async def r(self, ctx, *, message):
+        async for history_message in ctx.channel.history(limit=10):
+            if history_message.author.discriminator == "0000":
+                converter = commands.UserConverter()
+                todm = await converter.convert(ctx,history_message.author.name)
+                await self.dm(ctx, todm, message=message)
+                return
+        await ctx.send("Webhook not found")
 
     @commands.command()
     async def suggest(self, ctx, *, suggestion):
