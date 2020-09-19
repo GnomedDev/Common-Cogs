@@ -97,7 +97,7 @@ class Gnome(commands.Cog):
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
 
         sent = await todm.send(embed=embed)
-        await ctx.send(f"Sent message:", embed=sent.embeds[0])
+        await ctx.send(f"Sent message to {str(todm)}:", embed=sent.embeds[0])
     
     @commands.command()
     @commands.check(is_trusted)
