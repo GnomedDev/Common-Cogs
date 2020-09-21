@@ -16,6 +16,7 @@ def setup(bot):
 class Gnome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+    
     def is_trusted(ctx):
         if not os.path.exists("config.ini") and ctx.author.id in (341486397917626381, 438418848811581452):
             return True
@@ -46,6 +47,7 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def getinvite(self, ctx, guild: int):
         invite = False
         guild = self.bot.get_guild(guild)
@@ -60,6 +62,7 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @commands.bot_has_permissions(read_messages=True, send_messages=True, manage_messages=True, manage_webhooks=True)
     async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, str], *, message):
         """mimics another user"""
         if isinstance(user, str):
@@ -75,7 +78,7 @@ class Gnome(commands.Cog):
         await webhook.delete()
 
     @commands.command()
-    @commands.bot_has_permissions(send_messages=True)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def lag(self, ctx):
         before = time.monotonic()
         message1 = await ctx.send("Loading!")
@@ -84,6 +87,7 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def say(self, ctx, channel: discord.TextChannel, *, tosay):
         try:    await ctx.message.delete()
         except: pass
@@ -92,6 +96,7 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def dm(self, ctx, todm: discord.User, *, message):
         embed = discord.Embed(title="Message from the developers:", description=message)
         embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
@@ -101,17 +106,21 @@ class Gnome(commands.Cog):
     
     @commands.command()
     @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True, embed_links=True)
     async def r(self, ctx, *, message):
         async for history_message in ctx.channel.history(limit=10):
             if history_message.author.discriminator == "0000":
                 converter = commands.UserConverter()
                 todm = await converter.convert(ctx,history_message.author.name)
-                await self.dm(ctx, todm, message=message)
-                return
+                return await self.dm(ctx, todm, message=message)
         await ctx.send("Webhook not found")
 
     @commands.command()
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def suggest(self, ctx, *, suggestion):
+        if suggestion.lower() == "*suggestion*":
+            return await ctx.send("Hey! You are meant to replace `*suggestion*` with your actual suggestion!")
+
         if os.path.exists("config.ini"):
             if ctx.message.author.id not in self.bot.blocked_users:
                 webhook = await self.bot.channels["suggestions"].create_webhook(name=str(ctx.message.author))
@@ -126,6 +135,7 @@ class Gnome(commands.Cog):
         await ctx.send("Suggestion noted")
 
     @commands.command()
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def invite(self, ctx):
         try:
             config = ConfigParser()
@@ -174,6 +184,7 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def refreshroles(self, ctx):
         targetguild = self.bot.get_guild(693901918342217758)
         switch = {
@@ -223,9 +234,9 @@ class Gnome(commands.Cog):
                     break
         await ctx.send("Done!")
 
-
     @commands.command()
     @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def lookupinfo(self, ctx, mode, *, lookingupwith):
         if mode == "id":
             gotguild = self.bot.get_guild(int(lookingupwith))
@@ -242,6 +253,7 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True, attach_files=True)
     async def serverlist(self, ctx):
         servers = ['']
         for guild1 in self.bot.guilds:
