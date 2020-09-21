@@ -242,10 +242,10 @@ class Gnome(commands.Cog):
         guild_object = False
 
         if mode == "id":
-            guild_object = bot.get_guild(int(guild))
+            guild_object = self.bot.get_guild(int(guild))
 
         elif mode == "name":
-            for all_guild in bot.guilds:
+            for all_guild in self.bot.guilds:
                 if guild in all_guild.name:
                     guild_object = all_guild
 
