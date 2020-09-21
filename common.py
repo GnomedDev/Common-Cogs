@@ -16,7 +16,7 @@ def setup(bot):
 class Gnome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     def is_trusted(ctx):
         if not os.path.exists("config.ini") and ctx.author.id in (341486397917626381, 438418848811581452):
             return True
@@ -51,13 +51,13 @@ class Gnome(commands.Cog):
     async def getinvite(self, ctx, guild: int):
         invite = False
         guild = self.bot.get_guild(guild)
-        
+
         for channel in guild.channels:
             try:    invite = str(await channel.create_invite())
             except: continue
             if invite:
                 return await ctx.send(f"Invite to {guild.name} | {guild.id}: {invite}")
-                  
+
         await ctx.send("Error: No permissions to make an invite!")
 
     @commands.command()
@@ -91,7 +91,7 @@ class Gnome(commands.Cog):
     async def say(self, ctx, channel: discord.TextChannel, *, tosay):
         try:    await ctx.message.delete()
         except: pass
-        
+
         await channel.send(tosay)
 
     @commands.command()
@@ -103,7 +103,7 @@ class Gnome(commands.Cog):
 
         sent = await todm.send(embed=embed)
         await ctx.send(f"Sent message to {str(todm)}:", embed=sent.embeds[0])
-    
+
     @commands.command()
     @commands.check(is_trusted)
     @commands.bot_has_permissions(read_messages=True, send_messages=True, embed_links=True)
@@ -146,7 +146,7 @@ class Gnome(commands.Cog):
                 await ctx.send(f"Join https://discord.gg/zWPWwQC and look in #{self.bot.get_channel(694127922801410119).name} to invite {self.bot.user.mention}!")
         except:
             await ctx.send(f"To invite {self.bot.user.mention}, join <https://discord.gg/zWPWwQC> and the invites are in '#invites-and-rules'!")
-            
+
     @commands.command()
     @commands.is_owner()
     async def load_cog(self, ctx, *, loaded: str):
@@ -236,31 +236,37 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.check(is_trusted)
-    @commands.bot_has_permissions(read_messages=True, send_messages=True)
-    async def lookupinfo(self, ctx, mode, *, lookingupwith):
-        if mode == "id":
-            gotguild = self.bot.get_guild(int(lookingupwith))
-        if mode == "name":
-            for guild in self.bot.guilds:
-                if lookingupwith in guild.name:
-                    gotguild = guild
+    @commands.bot_has_permissions(read_messages=True, send_messages=True, embed_links=True)
+    async def lookupinfo(self, ctx, mode, *, guild):
+        mode = mode.lower()
+        guild_object = False
 
-        await ctx.send(cleandoc(f"""
-          Name = {gotguild.name}
-          ID = {str(gotguild.id)}
-          Owner = {str(gotguild.owner)} with id {str(gotguild.owner.id)}"""
-          ))
+        if mode == "id":
+            guild_object = bot.get_guild(int(guild))
+
+        elif mode == "name":
+            for all_guild in bot.guilds:
+                if guild in all_guild.name:
+                    guild_object = all_guild
+
+        if guild_object is False:
+            raise commands.BadArgument
+
+        embed = discord.Embed(title=guild_object.name)
+        embed.add_field(name="Guild ID", value=guild_object.id, inline=False)
+        embed.add_field(name="Owner Name | ID", value=f"{guild_object.owner.name} | {guild_object.owner.id}", inline=False)
+        embed.add_field(name="Member Count", value=guild_object.member_count, inline=False)
+        embed.set_thumbnail(url=str(guild_object.icon_url))
+        await ctx.send(embed=embed)
 
     @commands.command()
     @commands.check(is_trusted)
     @commands.bot_has_permissions(read_messages=True, send_messages=True, attach_files=True)
     async def serverlist(self, ctx):
-        servers = ['']
-        for guild1 in self.bot.guilds:
-            servers.append(guild1.name)
+        servers = [guild.name for guild in self.bot.guilds]
+
         if len(str(servers)) >= 2000:
-            with open("servers.txt", "w") as f:
-                f.write(str(servers))
+            with open("servers.txt", "w") as f: f.write(str(servers))
             await ctx.send(file=discord.File("servers.txt"))
         else:
             await ctx.send(servers)
