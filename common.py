@@ -46,74 +46,12 @@ class Gnome(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    @commands.check(is_trusted)
-    @commands.bot_has_permissions(read_messages=True, send_messages=True)
-    async def getinvite(self, ctx, guild: int):
-        invite = False
-        guild = self.bot.get_guild(guild)
-
-        for channel in guild.channels:
-            try:    invite = str(await channel.create_invite())
-            except: continue
-            if invite:
-                return await ctx.send(f"Invite to {guild.name} | {guild.id}: {invite}")
-
-        await ctx.send("Error: No permissions to make an invite!")
-
-    @commands.command()
-    @commands.is_owner()
-    @commands.bot_has_permissions(read_messages=True, send_messages=True, manage_messages=True, manage_webhooks=True)
-    async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, str], *, message):
-        """mimics another user"""
-        if isinstance(user, str):
-            hookname = user
-            avatar = "https://cdn.discordapp.com/avatars/689564772512825363/f05524fd9e011108fd227b85c53e3d87.png"
-        else:
-            hookname = user.display_name
-            avatar = user.avatar_url
-
-        webhook = await ctx.channel.create_webhook(name=hookname)
-        await webhook.send(message,avatar_url=avatar)
-        await ctx.message.delete()
-        await webhook.delete()
-
-    @commands.command()
     @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def lag(self, ctx):
         before = time.monotonic()
         message1 = await ctx.send("Loading!")
         ping = (time.monotonic() - before) * 1000
         await message1.edit(content=f"Current Latency: `{int(ping)}ms`")
-
-    @commands.command()
-    @commands.is_owner()
-    @commands.bot_has_permissions(read_messages=True, send_messages=True)
-    async def say(self, ctx, channel: discord.TextChannel, *, tosay):
-        try:    await ctx.message.delete()
-        except: pass
-
-        await channel.send(tosay)
-
-    @commands.command()
-    @commands.check(is_trusted)
-    @commands.bot_has_permissions(read_messages=True, send_messages=True)
-    async def dm(self, ctx, todm: discord.User, *, message):
-        embed = discord.Embed(title="Message from the developers:", description=message)
-        embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
-
-        sent = await todm.send(embed=embed)
-        await ctx.send(f"Sent message to {str(todm)}:", embed=sent.embeds[0])
-
-    @commands.command()
-    @commands.check(is_trusted)
-    @commands.bot_has_permissions(read_messages=True, send_messages=True, embed_links=True)
-    async def r(self, ctx, *, message):
-        async for history_message in ctx.channel.history(limit=10):
-            if history_message.author.discriminator == "0000":
-                converter = commands.UserConverter()
-                todm = await converter.convert(ctx,history_message.author.name)
-                return await self.dm(ctx, todm, message=message)
-        await ctx.send("Webhook not found")
 
     @commands.command()
     @commands.bot_has_permissions(read_messages=True, send_messages=True)
@@ -148,39 +86,40 @@ class Gnome(commands.Cog):
             await ctx.send(f"To invite {self.bot.user.mention}, join <https://discord.gg/zWPWwQC> and the invites are in '#invites-and-rules'!")
 
     @commands.command()
-    @commands.is_owner()
-    async def load_cog(self, ctx, *, loaded: str):
-        try:
-            self.bot.load_extension(loaded)
-        except Exception as e:
-            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
-        else:
-            await ctx.send('**`SUCCESS`**')
+    @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
+    async def getinvite(self, ctx, guild: int):
+        invite = False
+        guild = self.bot.get_guild(guild)
+
+        for channel in guild.channels:
+            try:    invite = str(await channel.create_invite())
+            except: continue
+            if invite:
+                return await ctx.send(f"Invite to {guild.name} | {guild.id}: {invite}")
+
+        await ctx.send("Error: No permissions to make an invite!")
+        
+    @commands.command()
+    @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
+    async def dm(self, ctx, todm: discord.User, *, message):
+        embed = discord.Embed(title="Message from the developers:", description=message)
+        embed.set_author(name=str(ctx.author), icon_url=ctx.author.avatar_url)
+
+        sent = await todm.send(embed=embed)
+        await ctx.send(f"Sent message to {str(todm)}:", embed=sent.embeds[0])
 
     @commands.command()
-    @commands.is_owner()
-    async def unload_cog(self, ctx, *, unload: str):
-        try:
-            self.bot.unload_extension(unload)
-        except Exception as e:
-            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
-        else:
-            await ctx.send('**`SUCCESS`**')
-
-    @commands.command()
-    @commands.is_owner()
-    async def reload_cog(self, ctx, *, toreload: str):
-        try:
-            self.bot.reload_extension(toreload)
-        except Exception as e:
-            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
-        else:
-            await ctx.send('**`SUCCESS`**')
-
-    @commands.command()
-    @commands.is_owner()
-    async def end(self, ctx):
-        await self.bot.close()
+    @commands.check(is_trusted)
+    @commands.bot_has_permissions(read_messages=True, send_messages=True, embed_links=True)
+    async def r(self, ctx, *, message):
+        async for history_message in ctx.channel.history(limit=10):
+            if history_message.author.discriminator == "0000":
+                converter = commands.UserConverter()
+                todm = await converter.convert(ctx,history_message.author.name)
+                return await self.dm(ctx, todm, message=message)
+        await ctx.send("Webhook not found")
 
     @commands.command()
     @commands.check(is_trusted)
@@ -273,9 +212,50 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    @commands.bot_has_permissions(read_messages=True, send_messages=True, manage_messages=True, manage_webhooks=True)
+    async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, str], *, message):
+        """mimics another user"""
+        if isinstance(user, str):
+            hookname = user
+            avatar = "https://cdn.discordapp.com/avatars/689564772512825363/f05524fd9e011108fd227b85c53e3d87.png"
+        else:
+            hookname = user.display_name
+            avatar = user.avatar_url
+
+        webhook = await ctx.channel.create_webhook(name=hookname)
+        await webhook.send(message,avatar_url=avatar)
+        await ctx.message.delete()
+        await webhook.delete()
+
+    @commands.command()
+    @commands.is_owner()
+    @commands.bot_has_permissions(read_messages=True, send_messages=True)
+    async def say(self, ctx, channel: discord.TextChannel, *, tosay):
+        try:    await ctx.message.delete()
+        except: pass
+
+        await channel.send(tosay)
+
+    @commands.command()
+    @commands.is_owner()
+    async def reload_cog(self, ctx, *, toreload: str):
+        try:
+            self.bot.reload_extension(toreload)
+        except Exception as e:
+            await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
+        else:
+            await ctx.send('**`SUCCESS`**')
+
+    @commands.command()
+    @commands.is_owner()
+    async def end(self, ctx):
+        await self.bot.close()
+
+    @commands.command()
+    @commands.is_owner()
     async def leaveguild(self, ctx, guild : int):
         await self.bot.get_guild(guild).leave()
-     #//////////////////////////////////////////////////////
+#//////////////////////////////////////////////////////
 
     @commands.command()
     @commands.check(is_trusted)
