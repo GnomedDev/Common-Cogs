@@ -99,7 +99,7 @@ class Gnome(commands.Cog):
                 return await ctx.send(f"Invite to {guild.name} | {guild.id}: {invite}")
 
         await ctx.send("Error: No permissions to make an invite!")
-        
+
     @commands.command()
     @commands.check(is_trusted)
     @commands.bot_has_permissions(read_messages=True, send_messages=True)
@@ -215,17 +215,22 @@ class Gnome(commands.Cog):
     @commands.bot_has_permissions(read_messages=True, send_messages=True, manage_messages=True, manage_webhooks=True)
     async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, str], *, message):
         """mimics another user"""
+        await ctx.message.delete()
         if isinstance(user, str):
-            hookname = user
+            name = user
             avatar = "https://cdn.discordapp.com/avatars/689564772512825363/f05524fd9e011108fd227b85c53e3d87.png"
         else:
-            hookname = user.display_name
+            name = user.display_name
             avatar = user.avatar_url
 
-        webhook = await ctx.channel.create_webhook(name=hookname)
-        await webhook.send(message,avatar_url=avatar)
-        await ctx.message.delete()
-        await webhook.delete()
+        webhooks = await ctx.channel.webhooks()
+        if len(webhooks) == 0:
+            webhook = await ctx.channel.create_webhook(name="Temp Webhook For -sudo")
+            await webhook.send(message, avatar_url=avatar)
+            await webhook.delete()
+        else:
+            webhook = webhooks[0]
+            await webhook.send(message, username=name, avatar_url=avatar)
 
     @commands.command()
     @commands.is_owner()
