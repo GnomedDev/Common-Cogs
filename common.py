@@ -61,13 +61,19 @@ class Gnome(commands.Cog):
 
         if os.path.exists("config.ini"):
             if ctx.message.author.id not in self.bot.blocked_users:
-                webhook = await self.bot.channels["suggestions"].create_webhook(name=str(ctx.message.author))
+                files = None
+                webhooks = await self.bot.channels["suggestions"].webhooks()
+
+                if len(webhooks) == 0:
+                    webhook = await self.bot.channels["suggestions"].create_webhook(name="SUGGESTIONS")
+                else:
+                    webhook = webhooks[0]
+
                 if ctx.message.attachments:
                     files = [await attachment.to_file() for attachment in ctx.message.attachments]
-                else:
-                    files = None
-                await webhook.send(suggestion, avatar_url=ctx.message.author.avatar_url, files=files)
-                await webhook.delete()
+
+                await webhook.send(suggestion, username=str(ctx.author), avatar_url=ctx.author.avatar_url, files=files)
+
         else:
             await self.bot.get_channel(696325283296444498).send(f"{str(ctx.author)} in {ctx.guild.name} suggested: {suggestion}")
         await ctx.send("Suggestion noted")
