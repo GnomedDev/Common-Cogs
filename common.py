@@ -226,7 +226,7 @@ class Gnome(commands.Cog):
         webhooks = await ctx.channel.webhooks()
         if len(webhooks) == 0:
             webhook = await ctx.channel.create_webhook(name="Temp Webhook For -sudo")
-            await webhook.send(message, avatar_url=avatar)
+            await webhook.send(message, username=name, avatar_url=avatar)
             await webhook.delete()
         else:
             webhook = webhooks[0]
