@@ -219,9 +219,14 @@ class Gnome(commands.Cog):
     @commands.command()
     @commands.is_owner()
     @commands.bot_has_permissions(read_messages=True, send_messages=True, manage_messages=True, manage_webhooks=True)
-    async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, str], *, message):
+    async def sudo(self, ctx, user: typing.Union[discord.Member, discord.User, int, str], *, message):
         """mimics another user"""
         await ctx.message.delete()
+
+        if isinstance(user, int):
+            try:    user = await self.bot.fetch_user(user)
+            except: user = str(user)
+
         if isinstance(user, str):
             name = user
             avatar = "https://cdn.discordapp.com/avatars/689564772512825363/f05524fd9e011108fd227b85c53e3d87.png"
