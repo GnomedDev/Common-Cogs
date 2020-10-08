@@ -4,12 +4,11 @@ from os.path import exists
 import discord
 from discord.ext import commands
 
+if exists("config.ini"):
+    config = ConfigParser()
+    config.read("config.ini")
 
 def setup(bot):
-    if exists("config.ini"):
-        config = ConfigParser()
-        config.read("config.ini")
-
     bot.add_cog(Gnome(bot))
 
 class Gnome(commands.Cog):
