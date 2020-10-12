@@ -61,10 +61,5 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def end(self, ctx):
-        await self.bot.close()
-
-    @commands.command()
-    @commands.is_owner()
     async def leaveguild(self, ctx, guild : int):
         await self.bot.get_guild(guild).leave()
