@@ -1,6 +1,7 @@
 from configparser import ConfigParser
 from inspect import cleandoc
 from os.path import exists
+from time import monotonic
 
 import discord
 from discord.ext import commands
@@ -12,7 +13,6 @@ def setup(bot):
         config.read("config.ini")
 
     bot.add_cog(User(bot))
-
 
 class User(commands.Cog):
     def __init__(self, bot):
@@ -42,9 +42,9 @@ class User(commands.Cog):
     @commands.command(aliases=["ping"])
     @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def lag(self, ctx):
-        before = time.monotonic()
+        before = monotonic()
         message1 = await ctx.send("Loading!")
-        ping = (time.monotonic() - before) * 1000
+        ping = (monotonic() - before) * 1000
         await message1.edit(content=f"Current Latency: `{int(ping)}ms`")
 
     @commands.command()
@@ -55,7 +55,6 @@ class User(commands.Cog):
 
         if exists("config.ini"):
             if ctx.message.author.id not in self.bot.blocked_users:
-                files = None
                 webhooks = await self.bot.channels["suggestions"].webhooks()
 
                 if len(webhooks) == 0:
@@ -63,8 +62,7 @@ class User(commands.Cog):
                 else:
                     webhook = webhooks[0]
 
-                if ctx.message.attachments:
-                    files = [await attachment.to_file() for attachment in ctx.message.attachments]
+                files = [await attachment.to_file() for attachment in ctx.message.attachments]
 
                 await webhook.send(suggestion, username=str(ctx.author), avatar_url=ctx.author.avatar_url, files=files)
 
