@@ -6,6 +6,8 @@ from time import monotonic
 import discord
 from discord.ext import commands
 
+from utils.basic import ensure_webhook
+from utils.settings import blocked_users_class as blocked_users
 
 def setup(bot):
     if exists("config.ini"):
@@ -54,18 +56,11 @@ class User(commands.Cog):
             return await ctx.send("Hey! You are meant to replace `*suggestion*` with your actual suggestion!")
 
         if exists("config.ini"):
-            if ctx.message.author.id not in self.bot.blocked_users:
-                webhooks = await self.bot.channels["suggestions"].webhooks()
-
-                if len(webhooks) == 0:
-                    webhook = await self.bot.channels["suggestions"].create_webhook(name="SUGGESTIONS")
-                else:
-                    webhook = webhooks[0]
-
+            if not blocked_users.check(ctx.message.author):
+                webhook = await ensure_webhook(self.bot.channels["suggestions"], "SUGGESTIONS")
                 files = [await attachment.to_file() for attachment in ctx.message.attachments]
 
                 await webhook.send(suggestion, username=str(ctx.author), avatar_url=ctx.author.avatar_url, files=files)
-
         else:
             await self.bot.get_channel(696325283296444498).send(f"{str(ctx.author)} in {ctx.guild.name} suggested: {suggestion}")
         await ctx.send("Suggestion noted")
