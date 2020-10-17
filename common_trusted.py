@@ -4,6 +4,12 @@ from os.path import exists
 import discord
 from discord.ext import commands
 
+switch = {
+    513423712582762502: 738009431052386304, #tts
+    565820959089754119: 738009620601241651, #f@h
+    689564772512825363: 738009624443224195 #channel
+}
+
 if exists("config.ini"):
     config = ConfigParser()
     config.read("config.ini")
@@ -62,52 +68,46 @@ class Gnome(commands.Cog):
     @commands.check(is_trusted)
     @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def refreshroles(self, ctx):
-        targetguild = self.bot.get_guild(693901918342217758)
-        switch = {
-          513423712582762502: 738009431052386304, #tts
-          565820959089754119: 738009620601241651, #f@h
-          689564772512825363: 738009624443224195 #channel
-        }
+        if not self.bot.supportserver.chunked:
+            await self.bot.supportserver.chunk(cache=True)
 
-        role = targetguild.get_role(switch[self.bot.user.id])
-        owner_id_list = [guild.owner.id for guild in self.bot.guilds]
+        ofs_role = self.bot.supportserver.get_role(switch[self.bot.user.id])
+        highlighted_ofs = self.bot.supportserver.get_role(703307566654160969)
 
-        for member in targetguild.members:
-            owner = member
-            member_roles = [I_have_role.id for I_have_role in member.roles]
+        people_with_owner_of_server = [member.id for member in ofs_role.members]
+        supportserver_members = [member.id for member in self.bot.supportserver]
 
-            if role.id in member_roles:
-                if member.id not in owner_id_list:
-                    await member.remove_roles(role)
+        chunked_guilds = [guild for guild in self.bot.guilds if guild.chunked]
+        chunked_owner_list = [guild.owner.id for guild in chunked_guilds]
 
-                    nope = 0
-                    for id in (738009431052386304, 738009620601241651, 738009624443224195):
-                        if id not in member_roles:
-                            nope += 1
-                    if nope == 3:
-                        await member.remove_roles(targetguild.get_role(703307566654160969), role)
+        owner_of_server_roles = (738009431052386304, 738009620601241651, 738009624443224195)
 
-                    embed = discord.Embed(description=f"Role Removed: Removed {role.mention} from {owner.mention}\n**Reason:** No longer Owner of a Server")
-                    embed.set_author(name=f"{str(owner)} (ID {owner.id})", icon_url=owner.avatar_url)
-                    embed.set_thumbnail(url=owner.avatar_url)
+        for guild_owner in chunked_owner_list:
+            if guild_owner.id not in supportserver_members: continue
 
-                    await self.bot.get_channel(696347411966066689).send(embed=embed)
-            else:
-                if member.id in owner_id_list:
-                    await member.add_roles(role)
+            guild_owner = self.bot.supportserver.get_member(guild_owner.id)
+            additional_message = False
+            embed = False
 
-                    embed = discord.Embed(description=f"Role Added: Gave {role.mention} to {owner.mention}\n**Reason:** Owner of a Server but not added by on_guild_join")
-                    embed.set_author(name=f"{str(owner)} (ID {owner.id})", icon_url=owner.avatar_url)
-                    embed.set_thumbnail(url=owner.avatar_url)
+            if guild_owner.id not in people_with_owner_of_server:
+                await guild_owner.add_roles(ofs_role)
 
-                    await self.bot.get_channel(696347411966066689).send(embed=embed)
+                embed = discord.Embed(description=f"Role Added: Gave {role.mention} to {owner.mention}")
+                embed.set_author(name=f"{str(owner)} (ID {owner.id})", icon_url=owner.avatar_url)
+                embed.set_thumbnail(url=owner.avatar_url)
 
-            member_roles = [I_have_role.id for I_have_role in member.roles]
-            for a_id in (738009431052386304, 738009620601241651, 738009624443224195):
-                if a_id in member_roles and 703307566654160969 not in member_roles:
-                    await member.add_roles(targetguild.get_role(703307566654160969))
-                    await self.bot.get_channel(696347411966066689).send(f"Added highlighted owner of a server to {member.mention}")
+            for role in owner_of_server_roles:
+                if role in guild_owner.roles and highlighted_ofs not in guild_owner.roles:
+                    additional_message = f"Added highlighted owner of a server to {member.mention}"
+                    await guild_owner.add_roles(highlighted_ofs)
                     break
+
+            if embed or additional_message:
+                if not embed: embed = None
+                if not additional_message: additional_message = None
+
+                await self.bot.channels["logs"].send(additional_message, embed=embed)
+
         await ctx.send("Done!")
 
     @commands.command()
