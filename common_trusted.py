@@ -97,6 +97,7 @@ class Gnome(commands.Cog):
                 embed.set_thumbnail(url=guild_owner.avatar_url)
 
             for role in owner_of_server_roles:
+                role = self.bot.supportserver.get_role(role)
                 if role in guild_owner.roles and highlighted_ofs not in guild_owner.roles:
                     additional_message = f"Added highlighted owner of a server to {guild_owner.mention}"
                     await guild_owner.add_roles(highlighted_ofs)
