@@ -92,13 +92,13 @@ class Gnome(commands.Cog):
             if guild_owner.id not in people_with_owner_of_server:
                 await guild_owner.add_roles(ofs_role)
 
-                embed = discord.Embed(description=f"Role Added: Gave {role.mention} to {owner.mention}")
+                embed = discord.Embed(description=f"Role Added: Gave {ofs_role.mention} to {guild_owner.mention}")
                 embed.set_author(name=f"{str(owner)} (ID {owner.id})", icon_url=owner.avatar_url)
                 embed.set_thumbnail(url=owner.avatar_url)
 
             for role in owner_of_server_roles:
                 if role in guild_owner.roles and highlighted_ofs not in guild_owner.roles:
-                    additional_message = f"Added highlighted owner of a server to {member.mention}"
+                    additional_message = f"Added highlighted owner of a server to {guild_owner.mention}"
                     await guild_owner.add_roles(highlighted_ofs)
                     break
 
