@@ -75,7 +75,7 @@ class Gnome(commands.Cog):
         highlighted_ofs = self.bot.supportserver.get_role(703307566654160969)
 
         people_with_owner_of_server = [member.id for member in ofs_role.members]
-        supportserver_members = [member.id for member in self.bot.supportserver]
+        supportserver_members = [member.id for member in self.bot.supportserver.members]
 
         chunked_guilds = [guild for guild in self.bot.guilds if guild.chunked]
         chunked_owner_list = [guild.owner.id for guild in chunked_guilds]
