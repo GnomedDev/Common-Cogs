@@ -78,7 +78,7 @@ class Gnome(commands.Cog):
         supportserver_members = [member.id for member in self.bot.supportserver.members]
 
         chunked_guilds = [guild for guild in self.bot.guilds if guild.chunked]
-        chunked_owner_list = [guild.owner.id for guild in chunked_guilds]
+        chunked_owner_list = [guild.owner for guild in chunked_guilds]
 
         owner_of_server_roles = (738009431052386304, 738009620601241651, 738009624443224195)
 
