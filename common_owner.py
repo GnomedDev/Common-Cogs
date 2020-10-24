@@ -42,6 +42,32 @@ class Gnome(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
+    async def trust(self, ctx, mode, user: Union[discord.User, str] = ""):
+        if mode == "list":
+            await ctx.send("\n".join(self.bot.trusted))
+
+        elif isinstance(user, str):
+            return
+
+        elif mode == "add":
+            self.bot.trusted.append(str(user.id))
+            config["Main"]["trusted_ids"] = str(self.bot.trusted)
+            with open("config.ini", "w") as configfile:
+                config.write(configfile)
+
+            await ctx.send(f"Added {str(user)} | {user.id} to the trusted members")
+
+        elif mode == "del":
+            if str(user.id) in self.bot.trusted:
+                self.bot.trusted.remove(str(user.id))
+                config["Main"]["trusted_ids"] = str(self.bot.trusted)
+                with open("config.ini", "w") as configfile:
+                    config.write(configfile)
+
+                await ctx.send(f"Removed {str(user)} | {user.id} from the trusted members")
+
+    @commands.command()
+    @commands.is_owner()
     @commands.bot_has_permissions(read_messages=True, send_messages=True)
     async def say(self, ctx, channel: discord.TextChannel, *, tosay):
         try:    await ctx.message.delete()

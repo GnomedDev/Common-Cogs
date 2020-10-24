@@ -4,6 +4,8 @@ from os.path import exists
 import discord
 from discord.ext import commands
 
+from utils.settings import blocked_users_class as blocked_users
+
 switch = {
     513423712582762502: 738009431052386304, #tts
     565820959089754119: 738009620601241651, #f@h
@@ -28,6 +30,30 @@ class Gnome(commands.Cog):
         raise commands.errors.NotOwner
 
     #////////////////////////////////////////////////////////
+    @commands.command()
+    @commands.check(is_trusted)
+    async def block(self, ctx, user: discord.User, notify: bool = False):
+        if blocked_users.check(user):
+            return await ctx.send(f"{str(user)} | {user.id} is already blocked!")
+
+        blocked_users.add(user)
+
+        await ctx.send(f"Blocked {str(user)} | {str(user.id)}")
+        if notify:
+            await user.send("You have been blocked from support DMs.\nPossible Reasons: ```Sending invite links\nTrolling\nSpam```")
+
+    @commands.command()
+    @commands.check(is_trusted)
+    async def unblock(self, ctx, user: discord.User, notify: bool = False):
+        if not blocked_users.check(user):
+            return await ctx.send(f"{str(user)} | {user.id} isn't blocked!")
+
+        blocked_users.remove(user)
+
+        await ctx.send(f"Unblocked {str(user)} | {str(user.id)}")
+        if notify:
+            await user.send("You have been unblocked from support DMs.")
+
     @commands.command()
     @commands.check(is_trusted)
     @commands.bot_has_permissions(read_messages=True, send_messages=True)
