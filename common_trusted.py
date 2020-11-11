@@ -115,7 +115,7 @@ class Gnome(commands.Cog):
                 if ofs_person in people_with_highlighted_ofs:
                     roles.append(highlighted_ofs)
 
-                await self.bot.supportserver.get_member(ofs_person).remove_roles(roles)
+                await self.bot.supportserver.get_member(ofs_person).remove_roles(*roles)
                 await self.bot.channels["logs"].send(embed=embed)
 
         for guild_owner in owner_list:
