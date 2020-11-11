@@ -101,17 +101,27 @@ class Gnome(commands.Cog):
         highlighted_ofs = self.bot.supportserver.get_role(703307566654160969)
 
         people_with_owner_of_server = [member.id for member in ofs_role.members]
+        people_with_highlighted_ofs = [member.id for member in highlighted_ofs.members]
         supportserver_members = [member.id for member in self.bot.supportserver.members]
 
-        chunked_guilds = [guild for guild in self.bot.guilds if guild.chunked]
-        chunked_owner_list = [guild.owner for guild in chunked_guilds]
+        owner_list = [guild.owner_id for guild in self.bot.guilds]
 
         owner_of_server_roles = (738009431052386304, 738009620601241651, 738009624443224195)
 
-        for guild_owner in chunked_owner_list:
-            if guild_owner.id not in supportserver_members: continue
+        for ofs_person in people_with_owner_of_server:
+            if ofs_person not in owner_list:
+                roles = [ofs_role,]
+                embed = discord.Embed(description=f"Role Removed: Removed {ofs_role.mention} from <@{ofs_person}>")
+                if ofs_person in people_with_highlighted_ofs:
+                    roles.append(highlighted_ofs)
 
-            guild_owner = self.bot.supportserver.get_member(guild_owner.id)
+                await ofs_person.remove_roles(roles)
+                await self.bot.channels["logs"].send(embed=embed)
+
+        for guild_owner in owner_list:
+            if guild_owner not in supportserver_members: continue
+
+            guild_owner = self.bot.supportserver.get_member(guild_owner)
             additional_message = False
             embed = False
 
