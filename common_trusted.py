@@ -105,8 +105,9 @@ class Gnome(commands.Cog):
         supportserver_members = [member.id for member in self.bot.supportserver.members]
 
         owner_list = [guild.owner_id for guild in self.bot.guilds]
-
-        owner_of_server_roles = (738009431052386304, 738009620601241651, 738009624443224195)
+        ofs_roles = list()
+        for role in (738009431052386304, 738009620601241651, 738009624443224195):
+            ofs_roles.append(self.bot.supportserver.get_role(role))
 
         for ofs_person in people_with_owner_of_server:
             if ofs_person not in owner_list:
@@ -132,12 +133,10 @@ class Gnome(commands.Cog):
                 embed.set_author(name=f"{str(guild_owner)} (ID {guild_owner.id})", icon_url=guild_owner.avatar_url)
                 embed.set_thumbnail(url=guild_owner.avatar_url)
 
-            for role in owner_of_server_roles:
-                role = self.bot.supportserver.get_role(role)
-                if role in guild_owner.roles and highlighted_ofs not in guild_owner.roles:
+            if highlighted_ofs not in guild_owner.roles:
+                if [True for role in ofs_roles if role in guild_owner.roles]:
                     additional_message = f"Added highlighted owner of a server to {guild_owner.mention}"
                     await guild_owner.add_roles(highlighted_ofs)
-                    break
 
             if embed or additional_message:
                 if not embed: embed = None
@@ -183,40 +182,3 @@ class Gnome(commands.Cog):
             await ctx.send(file=discord.File("servers.txt"))
         else:
             await ctx.send(servers)
-#//////////////////////////////////////////////////////
-
-    @commands.command()
-    @commands.check(is_trusted)
-    async def changeactivity(self, ctx, *, activity: str):
-        with open("activity.txt", "w") as f1, open("activitytype.txt") as f2, open("status.txt") as f3:
-            f1.write(activity)
-            activitytype = f2.read()
-            status = f3.read()
-        activitytype = getattr(discord.ActivityType, activitytype)
-        status = getattr(discord.Status, status)
-        await self.bot.change_presence(status=status, activity=discord.Activity(name=activity, type=activitytype))
-        await ctx.send(f"Changed activity to: {activity}")
-
-    @commands.command()
-    @commands.check(is_trusted)
-    async def changetype(self, ctx, *, activitytype: str):
-        with open("activity.txt") as f1, open("activitytype.txt", "w") as f2, open("status.txt") as f3:
-            activity = f1.read()
-            f2.write(activitytype)
-            status = f3.read()
-        activitytype1 = getattr(discord.ActivityType, activitytype)
-        status = getattr(discord.Status, status)
-        await self.bot.change_presence(status=status, activity=discord.Activity(name=activity, type=activitytype1))
-        await ctx.send(f"Changed activity type to: {activitytype}")
-
-    @commands.command()
-    @commands.check(is_trusted)
-    async def changestatus(self, ctx, *, status: str):
-        with open("activity.txt") as f1, open("activitytype.txt") as f2, open("status.txt", "w") as f3:
-            activity = f1.read()
-            activitytype = f2.read()
-            f3.write(status)
-        activitytype = getattr(discord.ActivityType, activitytype)
-        status1 = getattr(discord.Status, status)
-        await self.bot.change_presence(status=status1, activity=discord.Activity(name=activity, type=activitytype))
-        await ctx.send(f"Changed status to: {status}")
