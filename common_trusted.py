@@ -4,7 +4,7 @@ from os.path import exists
 import discord
 from discord.ext import commands
 
-from utils.settings import blocked_users_class as blocked_users
+from utils import settings
 
 switch = {
     513423712582762502: 738009431052386304, #tts
@@ -16,7 +16,10 @@ if exists("config.ini"):
     config = ConfigParser()
     config.read("config.ini")
 
-def setup(bot):
+def setup_with_db(bot, db_pool):
+    global blocked_users
+    blocked_users = settings.blocked_users_class(db_pool)
+
     bot.add_cog(Gnome(bot))
 
 class Gnome(commands.Cog):
@@ -28,15 +31,14 @@ class Gnome(commands.Cog):
         elif exists("config.ini") and str(ctx.author.id) in config["Main"]["trusted_ids"]:  return True
 
         raise commands.errors.NotOwner
-
     #////////////////////////////////////////////////////////
     @commands.command()
     @commands.check(is_trusted)
     async def block(self, ctx, user: discord.User, notify: bool = False):
-        if blocked_users.check(user):
+        if await blocked_users.check(user):
             return await ctx.send(f"{str(user)} | {user.id} is already blocked!")
 
-        blocked_users.add(user)
+        await blocked_users.add(user)
 
         await ctx.send(f"Blocked {str(user)} | {str(user.id)}")
         if notify:
@@ -45,10 +47,10 @@ class Gnome(commands.Cog):
     @commands.command()
     @commands.check(is_trusted)
     async def unblock(self, ctx, user: discord.User, notify: bool = False):
-        if not blocked_users.check(user):
+        if not await blocked_users.check(user):
             return await ctx.send(f"{str(user)} | {user.id} isn't blocked!")
 
-        blocked_users.remove(user)
+        await blocked_users.remove(user)
 
         await ctx.send(f"Unblocked {str(user)} | {str(user.id)}")
         if notify:
